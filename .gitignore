@@ -1,6 +1,9 @@
 # Dependency directories
 node_modules/
 
+# Local database file
+database.db
+
 # Log files
 *.log
 npm-debug.log*

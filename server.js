@@ -3,9 +3,17 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
+const fs = require('fs');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DB_PATH = path.join(__dirname, 'database.db');
+
+// Setup persistent disk support if running on Render / Cloud hosting with /data volume
+const DB_DIR = '/data';
+let DB_PATH = path.join(__dirname, 'database.db');
+if (fs.existsSync(DB_DIR)) {
+  DB_PATH = path.join(DB_DIR, 'database.db');
+}
 
 // Middleware
 app.use(cors());
