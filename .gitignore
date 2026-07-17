@@ -1,9 +1,6 @@
 # Dependency directories
 node_modules/
 
-# Local database file (contains personal booking information)
-database.db
-
 # Log files
 *.log
 npm-debug.log*
