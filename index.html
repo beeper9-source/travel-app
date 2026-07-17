@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>거북코여행 - 해외 여행 스마트 비서</title>
+  <meta name="description" content="세련되고 편리한 스마트 여행 플래너. 일정, 지출, 준비물 체크리스트, 환율 계산, 여행지 필수 서바이벌 회화까지 한눈에 관리하세요.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-theme="dark">
+
+  <div class="app-container">
+    <!-- Sidebar Navigation for Desktop -->
+    <aside class="sidebar">
+      <div class="logo-container">
+        <div class="logo-icon">🐢</div>
+        <div class="logo-text">거북코여행</div>
+      </div>
+      
+      <nav>
+        <ul class="nav-menu">
+          <li class="nav-item active" data-tab="dashboard">
+            <a class="nav-link">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+              <span>대시보드</span>
+            </a>
+          </li>
+          <li class="nav-item" data-tab="itinerary">
+            <a class="nav-link">
+              <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+              <span>일정 플래너</span>
+            </a>
+          </li>
+          <li class="nav-item" data-tab="expenses">
+            <a class="nav-link">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+              <span>지출 가계부</span>
+            </a>
+          </li>
+          <li class="nav-item" data-tab="checklist">
+            <a class="nav-link">
+              <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              <span>준비물 리스트</span>
+            </a>
+          </li>
+          <li class="nav-item" data-tab="converter">
+            <a class="nav-link">
+              <svg viewBox="0 0 24 24"><path d="M17 2.1l4 4-4 4M3 22v-6c0-1.1.9-2 2-2h10M7 21.9l-4-4 4-4M21 2v6c0 1.1-.9 2-2 2H9"/></svg>
+              <span>환율 계산기</span>
+            </a>
+          </li>
+          <li class="nav-item" data-tab="phrasebook">
+            <a class="nav-link">
+              <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span>서바이벌 회화</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="theme-toggle-btn" id="themeToggleBtn">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <span>라이트 모드</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Mobile Navigation Bottom Bar -->
+    <nav class="mobile-nav">
+      <div class="mobile-nav-item active" data-tab="dashboard">
+        <a class="mobile-nav-link">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          <span>홈</span>
+        </a>
+      </div>
+      <div class="mobile-nav-item" data-tab="itinerary">
+        <a class="mobile-nav-link">
+          <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          <span>일정</span>
+        </a>
+      </div>
+      <div class="mobile-nav-item" data-tab="expenses">
+        <a class="mobile-nav-link">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          <span>가계부</span>
+        </a>
+      </div>
+      <div class="mobile-nav-item" data-tab="checklist">
+        <a class="mobile-nav-link">
+          <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          <span>체크</span>
+        </a>
+      </div>
+      <div class="mobile-nav-item" data-tab="converter">
+        <a class="mobile-nav-link">
+          <svg viewBox="0 0 24 24"><path d="M17 2.1l4 4-4 4M3 22v-6c0-1.1.9-2 2-2h10M7 21.9l-4-4 4-4M21 2v6c0 1.1-.9 2-2 2H9"/></svg>
+          <span>환율</span>
+        </a>
+      </div>
+      <div class="mobile-nav-item" data-tab="phrasebook">
+        <a class="mobile-nav-link">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>회화</span>
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="content-header">
+        <div class="header-title">
+          <h1 id="pageTitle">대시보드</h1>
+          <p id="pageSubtitle">나의 여행 현황을 한눈에 살펴보세요.</p>
+        </div>
+        <div class="trip-switcher-container" id="tripSwitcherContainer" style="display: none;">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          <select class="trip-switcher-select" id="tripSwitcherSelect">
+            <!-- Populated dynamically with created trips -->
+          </select>
+        </div>
+        <div class="user-profile">
+          <div class="avatar">TR</div>
+          <span class="username">여행자 님</span>
+        </div>
+      </header>
+
+      <!-- 1. Dashboard Tab Panel -->
+      <section class="tab-panel active" id="dashboard-panel">
+        <div class="dashboard-grid">
+          
+          <div class="dashboard-left">
+            <!-- Active Trip Countdown -->
+            <div class="glass-card countdown-banner" id="activeTripBanner">
+              <div class="countdown-info">
+                <span class="countdown-tag" id="activeTripDest">등록된 일정 없음</span>
+                <h2 class="countdown-title" id="activeTripTitle">새로운 여행 일정을 등록해 보세요!</h2>
+                <p class="countdown-dates" id="activeTripDates">
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <span>기간 설정이 필요합니다.</span>
+                </p>
+              </div>
+              <div class="countdown-timer">
+                <div class="countdown-days" id="countdownDays">D-0</div>
+                <div class="countdown-label" id="countdownLabel">남은 일수</div>
+              </div>
+            </div>
+
+            <!-- Booking & Flight Details Card -->
+            <div id="bookingDetailsContainer" style="display: none;"></div>
+
+            <!-- Destinations Recommendation -->
+            <div class="glass-card">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-7.36 16.76L12 22l7.36-5.24A10 10 0 0 0 12 2zm0 13a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
+                  인기 추천 여행지
+                </h2>
+              </div>
+              <div class="destination-carousel" id="destinationsContainer">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-right">
+            <!-- Quick Trip Info Widget -->
+            <div class="glass-card">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  여행 요약 정보
+                </h2>
+              </div>
+              <div class="quick-stats-grid">
+                <div class="stat-item">
+                  <span class="stat-label">예정된 할 일</span>
+                  <span class="stat-value primary" id="widgetChecklistStatus">0 / 0</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">누적 지출액</span>
+                  <span class="stat-value accent" id="widgetTotalExpense">₩ 0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Expense Quick Chart -->
+            <div class="glass-card">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <svg viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                  카테고리별 지출 비율
+                </h2>
+              </div>
+              <div class="chart-container">
+                <svg width="180" height="180" class="chart-svg" id="expenseDonutChart">
+                  <circle r="70" cx="90" cy="90" class="chart-ring"></circle>
+                  <!-- SVG Segments will be drawn dynamically -->
+                </svg>
+                <div class="chart-text">
+                  <span class="chart-percentage" id="chartTotalValue">₩ 0</span>
+                  <span class="chart-label">총 지출</span>
+                </div>
+              </div>
+              <div class="chart-legend" id="chartLegendContainer">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 2. Itinerary Tab Panel -->
+      <section class="tab-panel" id="itinerary-panel">
+        <div class="itinerary-actions">
+          <button class="btn btn-primary" id="btnNewTrip">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            새로운 여행 등록
+          </button>
+          <button class="btn btn-secondary" id="btnAddActivity" style="display: none;">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            일정 추가
+          </button>
+        </div>
+
+        <!-- My Trip List Grid -->
+        <div class="trips-list-section" id="tripsListSection" style="margin-bottom: 2.5rem; display: none;">
+          <div class="card-header" style="margin-bottom: 1.25rem;">
+            <h3 class="card-title">
+              <svg viewBox="0 0 24 24"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
+              등록된 나의 여행 계획 목록
+            </h3>
+          </div>
+          <div class="trips-grid" id="tripsListGrid">
+            <!-- Dynamically populated cards -->
+          </div>
+        </div>
+
+        <!-- Initial Blank State -->
+        <div class="trip-setup-box" id="tripBlankState">
+          <h2>아직 등록된 여행지가 없습니다</h2>
+          <p>첫 번째 목적지를 등록하고 날짜별 맞춤 여행 일정을 설계해 보세요.</p>
+          <button class="btn btn-primary" id="btnNewTripBlank">여행 등록하기</button>
+        </div>
+
+        <!-- Timeline Container (Hidden initially) -->
+        <div class="itinerary-container" id="itineraryContainer" style="display: none;">
+          <!-- Left side Day Selector Card -->
+          <div class="glass-card day-selector-card">
+            <div class="card-header">
+              <h3 class="card-title">여행 일차</h3>
+            </div>
+            <ul class="day-list" id="daySelectorList">
+              <!-- Dynamically populated day tabs -->
+            </ul>
+          </div>
+
+          <!-- Right side Timeline -->
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <h2 id="currentDayTitle">Day 1 일정</h2>
+              <button class="btn btn-primary btn-sm" id="btnTimelineAddActivity">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                일정 추가
+              </button>
+            </div>
+            <div class="timeline-list" id="timelineList">
+              <!-- Dynamically populated timeline items -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Expenses Tab Panel -->
+      <section class="tab-panel" id="expenses-panel">
+        <div class="expense-header-actions">
+          <div class="expense-total-display">
+            <span class="expense-total-label">총 여행 경비 환산액 :</span>
+            <span class="expense-total-amount" id="expenseTotalAmount">₩ 0</span>
+          </div>
+          <button class="btn btn-primary" id="btnNewExpense">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            지출 추가
+          </button>
+        </div>
+
+        <div class="expense-layout">
+          <!-- Left: Expenses List -->
+          <div class="glass-card">
+            <div class="card-header">
+              <h3 class="card-title">최근 지출 내역</h3>
+            </div>
+            <div class="expense-list" id="expenseListContainer">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Right: Visual Breakdowns -->
+          <div class="dashboard-right">
+            <div class="glass-card">
+              <div class="card-header">
+                <h3 class="card-title">지출 통계</h3>
+              </div>
+              <div class="chart-container">
+                <svg width="180" height="180" class="chart-svg" id="expenseDonutChartMain">
+                  <circle r="70" cx="90" cy="90" class="chart-ring"></circle>
+                </svg>
+                <div class="chart-text">
+                  <span class="chart-percentage" id="chartTotalValueMain">₩ 0</span>
+                  <span class="chart-label">총 합계</span>
+                </div>
+              </div>
+              <div class="chart-legend" id="chartLegendContainerMain">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Packing Checklist Tab Panel -->
+      <section class="tab-panel" id="checklist-panel">
+        <div class="checklist-layout">
+          <!-- Left Categories -->
+          <div class="glass-card">
+            <div class="checklist-progress-card">
+              <span class="stat-label">준비 완료도</span>
+              <div class="checklist-progress-container">
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" id="checklistProgressBar"></div>
+                </div>
+              </div>
+              <div class="checklist-progress-text">
+                <span id="checklistProgressPercent">0%</span>
+                <span id="checklistProgressRatio">0 / 0</span>
+              </div>
+            </div>
+            <ul class="checklist-category-menu">
+              <li><button class="checklist-cat-btn active" data-category="all">전체 목록</button></li>
+              <li><button class="checklist-cat-btn" data-category="essential">필수 준비물</button></li>
+              <li><button class="checklist-cat-btn" data-category="electronics">전자기기</button></li>
+              <li><button class="checklist-cat-btn" data-category="toiletries">세면 & 화장품</button></li>
+              <li><button class="checklist-cat-btn" data-category="clothing">의류</button></li>
+              <li><button class="checklist-cat-btn" data-category="medicine">비상 의약품</button></li>
+            </ul>
+          </div>
+
+          <!-- Right Checklist Cards -->
+          <div>
+            <div class="checklist-section-header">
+              <h2 id="checklistCategoryTitle">전체 목록</h2>
+              <button class="btn btn-primary" id="btnNewChecklistItem">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                준비물 추가
+              </button>
+            </div>
+            <div class="checklist-items-grid" id="checklistGrid">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Currency Converter Tab Panel -->
+      <section class="tab-panel" id="converter-panel">
+        <div class="converter-container">
+          <div class="glass-card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <svg viewBox="0 0 24 24"><path d="M17 2.1l4 4-4 4M3 22v-6c0-1.1.9-2 2-2h10M7 21.9l-4-4 4-4M21 2v6c0 1.1-.9 2-2 2H9"/></svg>
+                실시간 환율 변환기
+              </h2>
+            </div>
+            
+            <div class="converter-grid">
+              <!-- From Currency -->
+              <div class="converter-card" style="background: rgba(255,255,255,0.02); border: 1px solid var(--card-border); border-radius: 16px;">
+                <div class="converter-group">
+                  <label class="converter-label">보내는 통화</label>
+                  <div class="converter-input-wrapper">
+                    <select class="currency-select" id="converterFromCurrency">
+                      <!-- Populated via currencies -->
+                    </select>
+                    <input type="text" class="converter-input" id="converterFromInput" value="1,000">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Swap Button -->
+              <div class="swap-btn-container">
+                <button class="swap-btn" id="btnSwapCurrency">
+                  <svg viewBox="0 0 24 24"><polyline points="16 3 21 8 16 13"/><line x1="21" y1="8" x2="9" y2="8"/><polyline points="8 21 3 16 8 11"/><line x1="3" y1="16" x2="15" y2="16"/></svg>
+                </button>
+              </div>
+
+              <!-- To Currency -->
+              <div class="converter-card" style="background: rgba(255,255,255,0.02); border: 1px solid var(--card-border); border-radius: 16px;">
+                <div class="converter-group">
+                  <label class="converter-label">받는 통화</label>
+                  <div class="converter-input-wrapper">
+                    <select class="currency-select" id="converterToCurrency">
+                      <!-- Populated via currencies -->
+                    </select>
+                    <input type="text" class="converter-input" id="converterToInput" readonly>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="rate-info-card">
+              <span class="rate-info-text">오늘의 적용 환율 기준: <span class="rate-info-highlight" id="converterExchangeRateText">1 USD = 1,385.00 KRW</span></span>
+            </div>
+          </div>
+
+          <!-- Currency Exchange Table -->
+          <div class="glass-card rates-table-card">
+            <div class="card-header">
+              <h2 class="card-title">주요 통화 환율 목록 (원화 대비)</h2>
+            </div>
+            <table class="rates-table">
+              <thead>
+                <tr>
+                  <th>외국 통화</th>
+                  <th>통화 코드</th>
+                  <th>현찰 살 때 (원화)</th>
+                  <th style="text-align: right;">전일 대비 변동</th>
+                </tr>
+              </thead>
+              <tbody id="ratesTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Travel Phrasebook Tab Panel -->
+      <section class="tab-panel" id="phrasebook-panel">
+        <div class="phrasebook-controls">
+          <div class="search-wrapper">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="search-input" id="phraseSearchInput" placeholder="상황이나 필요한 한국어 문장을 검색하세요...">
+          </div>
+          <div class="phrase-lang-toggle">
+            <button class="phrase-lang-btn active" data-lang="en">영어 (EN)</button>
+            <button class="phrase-lang-btn" data-lang="jp">일본어 (JP)</button>
+          </div>
+        </div>
+
+        <div class="phrase-categories" id="phraseCategoryTabs">
+          <button class="phrase-cat-tab active" data-category="all">전체</button>
+          <button class="phrase-cat-tab" data-category="airport">공항/기내</button>
+          <button class="phrase-cat-tab" data-category="hotel">숙소/호텔</button>
+          <button class="phrase-cat-tab" data-category="restaurant">식당/주문</button>
+          <button class="phrase-cat-tab" data-category="emergency">긴급/도움</button>
+        </div>
+
+        <div class="phrases-grid" id="phrasesGridContainer">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL: Trip Setup -->
+  <div class="modal-backdrop" id="tripModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="tripModalTitle">새 여행 일정 등록</h3>
+        <button class="modal-close-btn close-modal-btn">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="tripForm">
+          <div class="form-group">
+            <label for="tripDestInput">여행지 선택</label>
+            <select class="form-control" id="tripDestInput" required>
+              <!-- Options populated dynamically -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="tripTitleInput">여행 이름</label>
+            <input type="text" class="form-control" id="tripTitleInput" placeholder="예: 2026 도쿄 여름 휴가" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tripStartInput">출발일</label>
+              <input type="date" class="form-control" id="tripStartInput" required>
+            </div>
+            <div class="form-group">
+              <label for="tripEndInput">도착일</label>
+              <input type="date" class="form-control" id="tripEndInput" required>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary close-modal-btn">취소</button>
+        <button class="btn btn-primary" type="submit" form="tripForm">등록 완료</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Add/Edit Activity -->
+  <div class="modal-backdrop" id="activityModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>일정 계획 추가</h3>
+        <button class="modal-close-btn close-modal-btn">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="activityForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="activityTimeInput">시간</label>
+              <input type="time" class="form-control" id="activityTimeInput" value="09:00" required>
+            </div>
+            <div class="form-group">
+              <label for="activityDaySelect">해당 일자</label>
+              <select class="form-control" id="activityDaySelect" required>
+                <!-- Populated based on trip duration -->
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="activityTitleInput">활동명</label>
+            <input type="text" class="form-control" id="activityTitleInput" placeholder="예: 시부야 스카이 전망대 방문" required>
+          </div>
+          <div class="form-group">
+            <label for="activityNoteInput">메모 / 세부 정보</label>
+            <textarea class="form-control" id="activityNoteInput" rows="3" placeholder="예: 사전에 구매한 모바일 티켓 QR 준비 필수"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary close-modal-btn">취소</button>
+        <button class="btn btn-primary" type="submit" form="activityForm">일정 저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Add Expense -->
+  <div class="modal-backdrop" id="expenseModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>여행 지출 추가</h3>
+        <button class="modal-close-btn close-modal-btn">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="expenseForm">
+          <div class="form-group">
+            <label for="expenseNameInput">지출 항목명</label>
+            <input type="text" class="form-control" id="expenseNameInput" placeholder="예: 이치란 라멘 점심식사" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="expenseCategoryInput">카테고리</label>
+              <select class="form-control" id="expenseCategoryInput" required>
+                <option value="food">식비 (Food)</option>
+                <option value="stay">숙박 (Accommodation)</option>
+                <option value="transport">교통 (Transport)</option>
+                <option value="shopping">쇼핑 (Shopping)</option>
+                <option value="etc">기타 (Others)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="expenseCurrencyInput">결제 통화</label>
+              <select class="form-control" id="expenseCurrencyInput" required>
+                <!-- Populated dynamically via currencies -->
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="expenseAmountInput">결제 금액</label>
+            <input type="number" step="any" class="form-control" id="expenseAmountInput" placeholder="금액 입력" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary close-modal-btn">취소</button>
+        <button class="btn btn-primary" type="submit" form="expenseForm">지출 등록</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Add Checklist Item -->
+  <div class="modal-backdrop" id="checklistItemModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>새 준비물 추가</h3>
+        <button class="modal-close-btn close-modal-btn">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="checklistItemForm">
+          <div class="form-group">
+            <label for="checklistNewName">준비물 이름</label>
+            <input type="text" class="form-control" id="checklistNewName" placeholder="예: 방수팩" required>
+          </div>
+          <div class="form-group">
+            <label for="checklistNewCategory">카테고리</label>
+            <select class="form-control" id="checklistNewCategory" required>
+              <option value="essential">필수 준비물</option>
+              <option value="electronics">전자기기</option>
+              <option value="toiletries">세면 & 화장품</option>
+              <option value="clothing">의류</option>
+              <option value="medicine">비상 의약품</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary close-modal-btn">취소</button>
+        <button class="btn btn-primary" type="submit" form="checklistItemForm">추가하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Area -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- JavaScript scripts -->
+  <script src="js/data.js?v=1.0.1"></script>
+  <script src="js/app.js?v=1.0.1"></script>
+</body>
+</html>
