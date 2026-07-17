@@ -11,6 +11,9 @@ let state = {
   phraseCategory: 'all'
 };
 
+// Detect if running on GitHub Pages or static host (no Node backend)
+const isStaticMode = window.location.hostname.endsWith('github.io') || window.location.protocol === 'file:';
+
 // API Base URL (relative since hosted on same port)
 const API_BASE = '/api';
 
@@ -37,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (state.allTrips.length === 0) {
     showToast("예약된 괌 여행 정보를 정리하여 로드 중...", "info");
     await autoSeedGuamTrip();
-    await loadStateFromDatabase(); // reload state from DB
+    await loadStateFromDatabase(); // reload state
   }
   
   // Render views
@@ -45,8 +48,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   showToast("데이터베이스 동기화 완료!", "success");
 });
 
-// Load state from SQLite API
+// Load state from SQLite API or localStorage fallback
 async function loadStateFromDatabase() {
+  if (isStaticMode) {
+    loadStateFromLocalStorageBackup();
+    return;
+  }
+
   try {
     // 1. Fetch all trips and active trip
     const tripsRes = await fetch(`${API_BASE}/trips`).then(r => r.ok ? r.json() : []);
@@ -80,14 +88,85 @@ async function loadStateFromDatabase() {
   }
 }
 
-// Seed checklist items to DB helper (unused now as checklists are seeded on trip creation or defaults per trip)
+// Fallback to local storage if API is offline / Static mode
+function loadStateFromLocalStorageBackup() {
+  const savedTrips = localStorage.getItem('globeease_all_trips');
+  const savedActiveTrip = localStorage.getItem('globeease_active_trip');
+  const savedActivitiesAll = localStorage.getItem('globeease_activities_all');
+  const savedExpensesAll = localStorage.getItem('globeease_expenses_all');
+  const savedChecklistAll = localStorage.getItem('globeease_checklist_all');
+  
+  state.allTrips = savedTrips ? JSON.parse(savedTrips) : [];
+  state.activeTrip = savedActiveTrip ? JSON.parse(savedActiveTrip) : null;
+  
+  // If activeTrip is null but trips exist, activate the first one
+  if (!state.activeTrip && state.allTrips.length > 0) {
+    state.activeTrip = state.allTrips[0];
+    state.activeTrip.isActive = true;
+    localStorage.setItem('globeease_active_trip', JSON.stringify(state.activeTrip));
+  }
+
+  const tripId = state.activeTrip ? state.activeTrip.id : '';
+
+  const activitiesAll = savedActivitiesAll ? JSON.parse(savedActivitiesAll) : [];
+  const expensesAll = savedExpensesAll ? JSON.parse(savedExpensesAll) : [];
+  const checklistAll = savedChecklistAll ? JSON.parse(savedChecklistAll) : [];
+
+  if (tripId) {
+    state.activities = activitiesAll.filter(act => act.tripId === tripId);
+    state.expenses = expensesAll.filter(exp => exp.tripId === tripId);
+    state.checklist = checklistAll.filter(ch => ch.tripId === tripId);
+  } else {
+    state.activities = [];
+    state.expenses = [];
+    state.checklist = [];
+  }
+}
+
+// Save master collections to local storage
+function saveStateToLocalStorage() {
+  localStorage.setItem('globeease_all_trips', JSON.stringify(state.allTrips));
+  localStorage.setItem('globeease_active_trip', JSON.stringify(state.activeTrip));
+
+  const tripId = state.activeTrip ? state.activeTrip.id : '';
+  if (tripId) {
+    // Activities
+    const savedActivitiesAll = localStorage.getItem('globeease_activities_all');
+    let activitiesAll = savedActivitiesAll ? JSON.parse(savedActivitiesAll) : [];
+    activitiesAll = activitiesAll.filter(act => act.tripId !== tripId).concat(state.activities);
+    localStorage.setItem('globeease_activities_all', JSON.stringify(activitiesAll));
+
+    // Expenses
+    const savedExpensesAll = localStorage.getItem('globeease_expenses_all');
+    let expensesAll = savedExpensesAll ? JSON.parse(savedExpensesAll) : [];
+    expensesAll = expensesAll.filter(exp => exp.tripId !== tripId).concat(state.expenses);
+    localStorage.setItem('globeease_expenses_all', JSON.stringify(expensesAll));
+
+    // Checklist
+    const savedChecklistAll = localStorage.getItem('globeease_checklist_all');
+    let checklistAll = savedChecklistAll ? JSON.parse(savedChecklistAll) : [];
+    checklistAll = checklistAll.filter(ch => ch.tripId !== tripId).concat(state.checklist);
+    localStorage.setItem('globeease_checklist_all', JSON.stringify(checklistAll));
+  }
+}
+
+// Seed checklist items to DB helper
 async function seedChecklistDatabase(tripId) {
+  const defaultList = travelData.defaultChecklist.map(item => ({
+    ...item,
+    id: 'ch_' + Math.random().toString(36).substr(2, 9),
+    tripId
+  }));
+
+  if (isStaticMode) {
+    const savedChecklistAll = localStorage.getItem('globeease_checklist_all');
+    let checklistAll = savedChecklistAll ? JSON.parse(savedChecklistAll) : [];
+    checklistAll = checklistAll.concat(defaultList);
+    localStorage.setItem('globeease_checklist_all', JSON.stringify(checklistAll));
+    return;
+  }
+
   try {
-    const defaultList = travelData.defaultChecklist.map(item => ({
-      ...item,
-      id: 'ch_' + Math.random().toString(36).substr(2, 9),
-      tripId
-    }));
     await Promise.all(defaultList.map(item => 
       fetch(`${API_BASE}/checklist`, {
         method: 'POST',
@@ -130,6 +209,50 @@ async function autoSeedGuamTrip() {
     }
   };
 
+  const detailedActivities = [
+    // Day 1
+    { id: 'act_g1_1', day: 1, time: '19:05', title: '인천공항 제2터미널 카운터 수속 (진에어)', note: '출발 3시간 전 도착 권장 (19:05까지).\n진에어 위탁 수하물: 1인당 23kg 2개 무료, 기내 수하물: 12kg 1개.\n필수 지참: 여권, 이티켓, 전자 세관신고서, ETA(전자 여행허가승인).\n※ 사전 여행자계약서 동의 필수!', tripId },
+    { id: 'act_g1_2', day: 1, time: '22:05', title: '인천 국제 공항 출발 (진에어 LJ917)', note: '비행 소요시간: 약 4시간 20분\n석식: 무상 기내식 (간단한 스낵류) 제공.', tripId },
+    
+    // Day 2
+    { id: 'act_g2_1', day: 2, time: '03:35', title: '괌 국제 공항 도착 및 입국 수속', note: '괌 입국 수속 -> 수하물 수령 -> 입국장 외부 우측 투어 데스크 모니터 "노랑풍선" 가이드 미팅.\n다른 고객들과 10-15명 동승하여 호텔로 이동 (가이드 연락처 및 카톡 사전 확인).', tripId },
+    { id: 'act_g2_2', day: 2, time: '05:00', title: '웨스틴 리조트 괌 체크인 & 휴식', note: '별도 숙박 바우처 없이 여권으로 체크인 가능.\n체크인 후 오전 자유 시간 및 휴식.', tripId },
+    { id: 'act_g2_3', day: 2, time: '09:00', title: '호텔 조식 (웨스틴 리조트)', note: '조식: 호텔식 제공.', tripId },
+    { id: 'act_g2_4', day: 2, time: '14:00', title: '괌 아일랜드 관광 (2시간 소요 - 선택사항)', note: '1인당 $10 추가 (사전 신청 완료).\n코스:\n1) 스페인광장 (초콜릿 하우스, 역사 깊은 유적지)\n2) 사랑의절벽 (사랑의 종 타종 체험)\n3) 아가나 (시원한 바다 전망)', tripId },
+    { id: 'act_g2_5', day: 2, time: '18:00', title: '개별 중/석식 후 자유 일정', note: '중식: 불포함 (자유식)\n석식: 불포함 (자유식)\n호텔 수영장 이용 및 해변 산책.', tripId },
+
+    // Day 3
+    { id: 'act_g3_1', day: 3, time: '08:30', title: '호텔 조식 (웨스틴 리조트)', note: '조식: 호텔식 제공.', tripId },
+    { id: 'act_g3_2', day: 3, time: '10:00', title: '전일 자유 일정 (투몬 비치 물놀이 등)', note: '투몬 비치 해양 액티비티 또는 호텔 내 부대시설 휴식.\n중식: 불포함 (자유식)\n석식: 불포함 (자유식)', tripId },
+
+    // Day 4
+    { id: 'act_g4_1', day: 4, time: '08:30', title: '호텔 조식 (웨스틴 리조트)', note: '조식: 호텔식 제공.', tripId },
+    { id: 'act_g4_2', day: 4, time: '11:00', title: '체크아웃 준비 및 오전 자유시간', note: '캐리어 짐 정리 및 휴식.', tripId },
+    { id: 'act_g4_3', day: 4, time: '13:00', title: '오후 자유 일정 및 쇼핑', note: 'T갤러리아 면세점, GPO(괌 프리미어 아울렛) 쇼핑.\n중식: 불포함 (자유식)\n석식: 불포함 (자유식)', tripId },
+    { id: 'act_g4_4', day: 4, time: '23:00', title: '호텔 레이트 체크아웃 및 가이드 미팅', note: '23:00 - 00:00 웨스틴 리조트 레이트 체크아웃.\n가이드 미팅 후 공항 차량 이동.\n공항 도착 후 귀국 출국 수속 및 수하물 수속 진행.', tripId },
+
+    // Day 5
+    { id: 'act_g5_1', day: 5, time: '04:40', title: '괌 국제 공항 출발 (진에어 LJ918)', note: '괌 출발 04:40 -> 한국 도착 08:20 (약 4시간 30분 소요).', tripId },
+    { id: 'act_g5_2', day: 5, time: '08:20', title: '인천 국제 공항 도착 및 해산', note: '인천공항 제2여객터미널 도착, 위탁 수하물 수령 후 귀가.', tripId }
+  ];
+
+  const expDeposit = { id: "exp_deposit", name: "괌 패키지 여행 예약금", category: "stay", currency: "KRW", amount: 600000, amountKrw: 600000, dateStr: "5/22 10:31", tripId };
+  const expRemaining = { id: "exp_remaining", name: "괌 패키지 여행 잔금", category: "stay", currency: "KRW", amount: 2787000, amountKrw: 2787000, dateStr: "7/18 00:00", tripId };
+
+  if (isStaticMode) {
+    state.allTrips = [payload];
+    state.activeTrip = payload;
+    state.activities = detailedActivities;
+    state.expenses = [expDeposit, expRemaining];
+    state.checklist = travelData.defaultChecklist.map((item, idx) => ({
+      ...item,
+      id: 'ch_static_' + idx,
+      tripId
+    }));
+    saveStateToLocalStorage();
+    return;
+  }
+
   try {
     // Save Trip to API
     await fetch(`${API_BASE}/trips`, {
@@ -138,83 +261,25 @@ async function autoSeedGuamTrip() {
       body: JSON.stringify(payload)
     });
 
-    // Save Flight Activities (automatically seed to Day 1, Day 2 & Day 5)
-    const flightDay1 = {
-      id: "flight_dep",
-      day: 1,
-      time: "22:05",
-      title: "인천 출발 (진에어 LJ917)",
-      note: "한국 출발 22:05 -> 괌 도착 03:35 (금)\n예약자: 김구, 김정배, 김시원\n여권 지참 필수!",
-      tripId
-    };
-    const flightDay2 = {
-      id: "flight_arr",
-      day: 2,
-      time: "03:35",
-      title: "괌 도착 (진에어 LJ917)",
-      note: "괌 공항 입국 심사 후 웨스틴 리조트로 이동\n호텔 조식 예약 완료",
-      tripId
-    };
-    const flightDay5 = {
-      id: "flight_ret",
-      day: 5,
-      time: "04:40",
-      title: "괌 출발 (진에어 LJ918)",
-      note: "괌 출발 04:40 -> 한국 도착 08:20\n공항 샌딩 시간 및 위탁수하물 무게 점검",
-      tripId
-    };
-
-    await Promise.all([
+    await Promise.all(detailedActivities.map(act => 
       fetch(`${API_BASE}/activities`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(flightDay1)
-      }).catch(e => {}),
-      fetch(`${API_BASE}/activities`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(flightDay2)
-      }).catch(e => {}),
-      fetch(`${API_BASE}/activities`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(flightDay5)
-      }).catch(e => {})
-    ]);
-
-    // Save Package Expenses (auto seed to Expense Tracker)
-    const expDeposit = {
-      id: "exp_deposit",
-      name: "괌 패키지 여행 예약금",
-      category: "stay",
-      currency: "KRW",
-      amount: 600000,
-      amountKrw: 600000,
-      dateStr: "5/22 10:31",
-      tripId
-    };
-    const expRemaining = {
-      id: "exp_remaining",
-      name: "괌 패키지 여행 잔금",
-      category: "stay",
-      currency: "KRW",
-      amount: 2787000,
-      amountKrw: 2787000,
-      dateStr: "7/18 00:00",
-      tripId
-    };
+        body: JSON.stringify(act)
+      })
+    ));
 
     await Promise.all([
       fetch(`${API_BASE}/expenses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(expDeposit)
-      }).catch(e => {}),
+      }),
       fetch(`${API_BASE}/expenses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(expRemaining)
-      }).catch(e => {})
+      })
     ]);
 
     // Seed default checklists for Guam
@@ -222,21 +287,6 @@ async function autoSeedGuamTrip() {
   } catch (err) {
     console.error("Auto seeding failed:", err);
   }
-}
-
-// Fallback to local storage if API is offline
-function loadStateFromLocalStorageBackup() {
-  const savedTrip = localStorage.getItem('globeease_trip');
-  const savedActivities = localStorage.getItem('globeease_activities');
-  const savedExpenses = localStorage.getItem('globeease_expenses');
-  const savedChecklist = localStorage.getItem('globeease_checklist');
-  
-  const tripObj = savedTrip ? JSON.parse(savedTrip) : null;
-  state.activeTrip = tripObj;
-  state.allTrips = tripObj ? [tripObj] : [];
-  state.activities = savedActivities ? JSON.parse(savedActivities) : [];
-  state.expenses = savedExpenses ? JSON.parse(savedExpenses) : [];
-  state.checklist = savedChecklist ? JSON.parse(savedChecklist) : [...travelData.defaultChecklist];
 }
 
 // Theme storage (keeps in client localStorage since it is a user UI setting)
@@ -526,6 +576,7 @@ function applyTheme() {
   }
 }
 
+// Toggle Theme
 function toggleTheme() {
   state.theme = state.theme === 'dark' ? 'light' : 'dark';
   saveTheme();
@@ -575,6 +626,17 @@ function renderTripSwitcher() {
 
 // Switch current active trip
 async function switchActiveTrip(tripId) {
+  if (isStaticMode) {
+    state.allTrips = state.allTrips.map(t => ({ ...t, isActive: t.id === tripId }));
+    state.activeTrip = state.allTrips.find(t => t.id === tripId);
+    saveStateToLocalStorage();
+    loadStateFromLocalStorageBackup();
+    currentSelectedDay = 1;
+    renderAll();
+    showToast("선택된 여행 정보가 활성화되었습니다.");
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/trips/${tripId}/active`, { method: 'PUT' });
     if (!res.ok) throw new Error('API activation call failed');
@@ -596,6 +658,36 @@ async function switchActiveTrip(tripId) {
 // Delete an entire trip
 async function deleteTrip(tripId) {
   if (confirm("정말로 이 여행 계획을 삭제하시겠습니까?\n여행에 등록된 모든 일정 계획과 경비, 준비물 내역이 완전히 함께 삭제됩니다.")) {
+    if (isStaticMode) {
+      state.allTrips = state.allTrips.filter(t => t.id !== tripId);
+      if (state.activeTrip && state.activeTrip.id === tripId) {
+        state.activeTrip = state.allTrips[0] || null;
+        if (state.activeTrip) state.activeTrip.isActive = true;
+      }
+      
+      const savedActivitiesAll = localStorage.getItem('globeease_activities_all');
+      let activitiesAll = savedActivitiesAll ? JSON.parse(savedActivitiesAll) : [];
+      activitiesAll = activitiesAll.filter(act => act.tripId !== tripId);
+      localStorage.setItem('globeease_activities_all', JSON.stringify(activitiesAll));
+
+      const savedExpensesAll = localStorage.getItem('globeease_expenses_all');
+      let expensesAll = savedExpensesAll ? JSON.parse(savedExpensesAll) : [];
+      expensesAll = expensesAll.filter(exp => exp.tripId !== tripId);
+      localStorage.setItem('globeease_expenses_all', JSON.stringify(expensesAll));
+
+      const savedChecklistAll = localStorage.getItem('globeease_checklist_all');
+      let checklistAll = savedChecklistAll ? JSON.parse(savedChecklistAll) : [];
+      checklistAll = checklistAll.filter(ch => ch.tripId !== tripId);
+      localStorage.setItem('globeease_checklist_all', JSON.stringify(checklistAll));
+
+      saveStateToLocalStorage();
+      loadStateFromLocalStorageBackup();
+      currentSelectedDay = 1;
+      renderAll();
+      showToast("여행 계획을 영구 삭제했습니다.", "success");
+      return;
+    }
+
     try {
       const res = await fetch(`${API_BASE}/trips/${tripId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('API delete call failed');
@@ -899,7 +991,6 @@ function renderItinerary() {
     tripsListSection.style.display = 'block';
     tripsListGrid.innerHTML = state.allTrips.map(t => {
       const activeClass = state.activeTrip && state.activeTrip.id === t.id ? 'active' : '';
-      const destObj = travelData.destinations.find(d => d.id === t.destinationId) || { name: t.destinationId };
       return `
         <div class="glass-card trip-manager-card ${activeClass}">
           <h4 class="trip-manager-title">${t.title}</h4>
@@ -1093,6 +1184,19 @@ async function quickRegisterTrip(destId) {
     isActive: true
   };
 
+  if (isStaticMode) {
+    state.allTrips.push(payload);
+    state.activeTrip = payload;
+    state.allTrips = state.allTrips.map(t => ({ ...t, isActive: t.id === tripId }));
+    await seedChecklistDatabase(tripId);
+    saveStateToLocalStorage();
+    loadStateFromLocalStorageBackup();
+    currentSelectedDay = 1;
+    renderAll();
+    showToast(`${destObj.name} 일정이 등록되어 활성화되었습니다!`);
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/trips`, {
       method: 'POST',
@@ -1160,6 +1264,29 @@ async function handleTripSubmit(e) {
     isActive: editingTripId ? existingTrip.isActive : true // Activate if new trip
   };
 
+  if (isStaticMode) {
+    if (!editingTripId) {
+      state.allTrips.push(payload);
+      state.activeTrip = payload;
+      await seedChecklistDatabase(tripId);
+    } else {
+      state.allTrips = state.allTrips.map(t => t.id === tripId ? payload : t);
+      if (state.activeTrip && state.activeTrip.id === tripId) {
+        state.activeTrip = payload;
+      }
+    }
+    if (payload.isActive) {
+      state.allTrips = state.allTrips.map(t => ({ ...t, isActive: t.id === tripId }));
+    }
+    saveStateToLocalStorage();
+    closeAllModals();
+    loadStateFromLocalStorageBackup();
+    currentSelectedDay = 1;
+    renderAll();
+    showToast("여행 계획이 저장 및 업데이트되었습니다!");
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/trips`, {
       method: 'POST',
@@ -1206,6 +1333,20 @@ async function handleActivitySubmit(e) {
     tripId: state.activeTrip.id
   };
 
+  if (isStaticMode) {
+    const savedActivitiesAll = localStorage.getItem('globeease_activities_all');
+    let activitiesAll = savedActivitiesAll ? JSON.parse(savedActivitiesAll) : [];
+    activitiesAll.push(newActivity);
+    localStorage.setItem('globeease_activities_all', JSON.stringify(activitiesAll));
+
+    state.activities.push(newActivity);
+    closeAllModals();
+    selectItineraryDay(day);
+    renderDashboard();
+    showToast("새 일정이 타임라인에 등록되었습니다.");
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/activities`, {
       method: 'POST',
@@ -1227,6 +1368,19 @@ async function handleActivitySubmit(e) {
 
 async function deleteActivity(id) {
   if (confirm("정말로 이 일정을 삭제하시겠습니까?")) {
+    if (isStaticMode) {
+      const savedActivitiesAll = localStorage.getItem('globeease_activities_all');
+      let activitiesAll = savedActivitiesAll ? JSON.parse(savedActivitiesAll) : [];
+      activitiesAll = activitiesAll.filter(act => act.id !== id);
+      localStorage.setItem('globeease_activities_all', JSON.stringify(activitiesAll));
+
+      state.activities = state.activities.filter(act => act.id !== id);
+      renderItinerary();
+      renderDashboard();
+      showToast("일정이 리스트에서 제거되었습니다.");
+      return;
+    }
+
     try {
       const res = await fetch(`${API_BASE}/activities/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('API activity delete failed');
@@ -1379,6 +1533,20 @@ async function handleExpenseSubmit(e) {
     tripId: state.activeTrip.id
   };
 
+  if (isStaticMode) {
+    const savedExpensesAll = localStorage.getItem('globeease_expenses_all');
+    let expensesAll = savedExpensesAll ? JSON.parse(savedExpensesAll) : [];
+    expensesAll.push(newExpense);
+    localStorage.setItem('globeease_expenses_all', JSON.stringify(expensesAll));
+
+    state.expenses.push(newExpense);
+    closeAllModals();
+    renderExpenses();
+    renderDashboard();
+    showToast("새 지출 내역이 등록되었습니다.");
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/expenses`, {
       method: 'POST',
@@ -1400,6 +1568,19 @@ async function handleExpenseSubmit(e) {
 
 async function deleteExpense(id) {
   if (confirm("정말로 이 지출 항목을 삭제하시겠습니까?")) {
+    if (isStaticMode) {
+      const savedExpensesAll = localStorage.getItem('globeease_expenses_all');
+      let expensesAll = savedExpensesAll ? JSON.parse(savedExpensesAll) : [];
+      expensesAll = expensesAll.filter(exp => exp.id !== id);
+      localStorage.setItem('globeease_expenses_all', JSON.stringify(expensesAll));
+
+      state.expenses = state.expenses.filter(exp => exp.id !== id);
+      renderExpenses();
+      renderDashboard();
+      showToast("지출 내역이 안전하게 삭제되었습니다.");
+      return;
+    }
+
     try {
       const res = await fetch(`${API_BASE}/expenses/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('API expense delete failed');
@@ -1477,6 +1658,29 @@ function renderChecklist(category = 'all') {
 }
 
 async function toggleChecklistItem(id) {
+  if (isStaticMode) {
+    let targetItem = state.checklist.find(item => item.id === id);
+    if (!targetItem) return;
+    const newChecked = !targetItem.checked;
+
+    const savedChecklistAll = localStorage.getItem('globeease_checklist_all');
+    let checklistAll = savedChecklistAll ? JSON.parse(savedChecklistAll) : [];
+    checklistAll = checklistAll.map(ch => ch.id === id ? { ...ch, checked: newChecked } : ch);
+    localStorage.setItem('globeease_checklist_all', JSON.stringify(checklistAll));
+
+    state.checklist = state.checklist.map(item => item.id === id ? { ...item, checked: newChecked } : item);
+
+    const activeCat = document.querySelector('.checklist-cat-btn.active')?.getAttribute('data-category') || 'all';
+    renderChecklist(activeCat);
+    
+    const widgetChecklistStatus = document.getElementById('widgetChecklistStatus');
+    if (widgetChecklistStatus) {
+      const checkedCount = state.checklist.filter(item => item.checked).length;
+      widgetChecklistStatus.textContent = `${checkedCount} / ${state.checklist.length}`;
+    }
+    return;
+  }
+
   let targetItem = state.checklist.find(item => item.id === id);
   if (!targetItem) return;
 
@@ -1541,6 +1745,29 @@ async function handleChecklistItemSubmit(e) {
     tripId: state.activeTrip.id
   };
 
+  if (isStaticMode) {
+    const savedChecklistAll = localStorage.getItem('globeease_checklist_all');
+    let checklistAll = savedChecklistAll ? JSON.parse(savedChecklistAll) : [];
+    checklistAll.push(newItem);
+    localStorage.setItem('globeease_checklist_all', JSON.stringify(checklistAll));
+
+    state.checklist.push(newItem);
+    closeAllModals();
+    
+    // Highlight tab
+    document.querySelectorAll('.checklist-cat-btn').forEach(btn => {
+      if (btn.getAttribute('data-category') === category) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    renderChecklist(category);
+    showToast("새 준비물이 추가되었습니다.");
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/checklist`, {
       method: 'POST',
@@ -1570,6 +1797,19 @@ async function handleChecklistItemSubmit(e) {
 }
 
 async function deleteChecklistItem(id) {
+  if (isStaticMode) {
+    const savedChecklistAll = localStorage.getItem('globeease_checklist_all');
+    let checklistAll = savedChecklistAll ? JSON.parse(savedChecklistAll) : [];
+    checklistAll = checklistAll.filter(ch => ch.id !== id);
+    localStorage.setItem('globeease_checklist_all', JSON.stringify(checklistAll));
+
+    state.checklist = state.checklist.filter(item => item.id !== id);
+    const activeCat = document.querySelector('.checklist-cat-btn.active')?.getAttribute('data-category') || 'all';
+    renderChecklist(activeCat);
+    showToast("준비물이 리스트에서 해제되었습니다.");
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/checklist/${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error('API checklist delete failed');
