@@ -49,12 +49,6 @@
               <span>환율 계산기</span>
             </a>
           </li>
-          <li class="nav-item" data-tab="phrasebook">
-            <a class="nav-link">
-              <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              <span>서바이벌 회화</span>
-            </a>
-          </li>
         </ul>
       </nav>
 
@@ -96,12 +90,6 @@
         <a class="mobile-nav-link">
           <svg viewBox="0 0 24 24"><path d="M17 2.1l4 4-4 4M3 22v-6c0-1.1.9-2 2-2h10M7 21.9l-4-4 4-4M21 2v6c0 1.1-.9 2-2 2H9"/></svg>
           <span>환율</span>
-        </a>
-      </div>
-      <div class="mobile-nav-item" data-tab="phrasebook">
-        <a class="mobile-nav-link">
-          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span>회화</span>
         </a>
       </div>
     </nav>
@@ -432,32 +420,6 @@
               </tbody>
             </table>
           </div>
-        </div>
-      </section>
-
-      <!-- 6. Travel Phrasebook Tab Panel -->
-      <section class="tab-panel" id="phrasebook-panel">
-        <div class="phrasebook-controls">
-          <div class="search-wrapper">
-            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" class="search-input" id="phraseSearchInput" placeholder="상황이나 필요한 한국어 문장을 검색하세요...">
-          </div>
-          <div class="phrase-lang-toggle">
-            <button class="phrase-lang-btn active" data-lang="en">영어 (EN)</button>
-            <button class="phrase-lang-btn" data-lang="jp">일본어 (JP)</button>
-          </div>
-        </div>
-
-        <div class="phrase-categories" id="phraseCategoryTabs">
-          <button class="phrase-cat-tab active" data-category="all">전체</button>
-          <button class="phrase-cat-tab" data-category="airport">공항/기내</button>
-          <button class="phrase-cat-tab" data-category="hotel">숙소/호텔</button>
-          <button class="phrase-cat-tab" data-category="restaurant">식당/주문</button>
-          <button class="phrase-cat-tab" data-category="emergency">긴급/도움</button>
-        </div>
-
-        <div class="phrases-grid" id="phrasesGridContainer">
-          <!-- Dynamically populated -->
         </div>
       </section>
     </main>

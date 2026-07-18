@@ -1811,11 +1811,42 @@ header.content-header {
   
   .main-content {
     margin-left: 0;
-    padding: 1.5rem 1.5rem 6rem 1.5rem;
+    padding: 1.25rem 1.25rem 6.5rem 1.25rem;
   }
   
   header.content-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
     margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  .header-title {
+    text-align: center;
+  }
+
+  .header-title p {
+    font-size: 0.85rem;
+  }
+
+  .trip-switcher-container {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+  }
+
+  .trip-switcher-select {
+    flex-grow: 1;
+    text-align: center;
+    font-size: 0.85rem;
+  }
+  
+  .user-profile {
+    display: none;
   }
   
   /* Bottom mobile nav */
@@ -1830,7 +1861,7 @@ header.content-header {
     -webkit-backdrop-filter: var(--glass-blur);
     border-top: 1px solid var(--card-border);
     justify-content: space-around;
-    padding: 0.75rem;
+    padding: 0.65rem 0.5rem;
     z-index: 100;
   }
   
@@ -1838,16 +1869,16 @@ header.content-header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.2rem;
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 700;
   }
   
   .mobile-nav-link svg {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     stroke: currentColor;
     stroke-width: 2;
     fill: none;
@@ -1857,8 +1888,43 @@ header.content-header {
     color: var(--accent-primary);
   }
   
+  /* Layout adjustments */
+  .countdown-banner {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.25rem;
+    padding: 1.5rem;
+  }
+  
+  .countdown-timer {
+    text-align: center;
+  }
+
+  .countdown-title {
+    font-size: 1.3rem;
+  }
+
+  .countdown-days {
+    font-size: 2.8rem;
+  }
+  
+  .booking-info-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem;
+  }
+
+  .trips-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem;
+  }
+
   .destination-carousel {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .dest-card {
+    height: 180px;
   }
   
   .checklist-items-grid, .phrases-grid {
@@ -1867,6 +1933,7 @@ header.content-header {
   
   .converter-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .swap-btn {
@@ -1875,6 +1942,31 @@ header.content-header {
   
   .swap-btn:hover {
     transform: rotate(270deg) scale(1.05);
+  }
+
+  .toast-container {
+    right: 1.25rem;
+    left: 1.25rem;
+    bottom: 5.5rem;
+  }
+
+  .toast {
+    font-size: 0.8rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .modal-card {
+    max-width: 100%;
+    border-radius: 16px;
+  }
+
+  .modal-header, .modal-body, .modal-footer {
+    padding: 1rem 1.25rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
 }
 

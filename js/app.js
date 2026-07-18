@@ -414,36 +414,6 @@ function setupEventListeners() {
     });
   }
 
-  // Phrase Search Input
-  const phraseSearch = document.getElementById('phraseSearchInput');
-  if (phraseSearch) {
-    phraseSearch.addEventListener('input', () => {
-      renderPhrases();
-    });
-  }
-
-  // Phrase Language selection
-  const phraseLangBtns = document.querySelectorAll('.phrase-lang-btn');
-  phraseLangBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      phraseLangBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.phraseLang = btn.getAttribute('data-lang');
-      renderPhrases();
-    });
-  });
-
-  // Phrase Category Tabs
-  const phraseCatTabs = document.querySelectorAll('.phrase-cat-tab');
-  phraseCatTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      phraseCatTabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      state.phraseCategory = tab.getAttribute('data-category');
-      renderPhrases();
-    });
-  });
-
   // Trip Switcher Header Select change handler
   const switcherSelect = document.getElementById('tripSwitcherSelect');
   if (switcherSelect) {
@@ -513,8 +483,6 @@ function switchTab(tabId) {
     renderChecklist(activeCat);
   } else if (tabId === 'converter') {
     setupConverter();
-  } else if (tabId === 'phrasebook') {
-    renderPhrases();
   }
   
   // Smooth scroll to top
@@ -530,7 +498,6 @@ function renderAll() {
   const activeCat = document.querySelector('.checklist-cat-btn.active')?.getAttribute('data-category') || 'all';
   renderChecklist(activeCat);
   setupConverter();
-  renderPhrases();
 }
 
 // Toast helper
@@ -1970,81 +1937,6 @@ function renderRatesTable() {
       </tr>
     `;
   }).join('');
-}
-
-// -------------------------
-// 6. PHRASEBOOK VIEW
-// -------------------------
-function renderPhrases() {
-  const grid = document.getElementById('phrasesGridContainer');
-  const searchInput = document.getElementById('phraseSearchInput');
-  const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
-
-  if (!grid) return;
-
-  let filtered = travelData.phrases;
-  if (state.phraseCategory !== 'all') {
-    filtered = filtered.filter(p => p.category === state.phraseCategory);
-  }
-
-  if (searchQuery) {
-    filtered = filtered.filter(p => {
-      return p.kr.toLowerCase().includes(searchQuery) ||
-             p.en.toLowerCase().includes(searchQuery) ||
-             p.jp.toLowerCase().includes(searchQuery) ||
-             p.situation.toLowerCase().includes(searchQuery);
-    });
-  }
-
-  const categoryTexts = {
-    airport: '공항 / 기내',
-    hotel: '호텔 / 숙소',
-    restaurant: '식당 / 주문',
-    emergency: '긴급 / 도움'
-  };
-
-  if (filtered.length === 0) {
-    grid.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem; color: var(--text-secondary);">
-        검색 결과와 부합하는 필수 회화가 없습니다.
-      </div>
-    `;
-    return;
-  }
-
-  grid.innerHTML = filtered.map(phrase => {
-    const isEn = state.phraseLang === 'en';
-    const foreignText = isEn ? phrase.en : phrase.jp;
-    const pronText = isEn ? phrase.en_pron : phrase.jp_pron;
-    const voiceLang = isEn ? 'en-US' : 'ja-JP';
-
-    return `
-      <div class="glass-card phrase-card">
-        <div class="phrase-tag">${categoryTexts[phrase.category]} | ${phrase.situation}</div>
-        <div class="phrase-kr">${phrase.kr}</div>
-        <div class="phrase-foreign-group">
-          <div class="phrase-foreign">${foreignText}</div>
-          <div class="phrase-pron">${pronText}</div>
-        </div>
-        
-        <button class="phrase-speak-btn" onclick="speakText('${foreignText.replace(/'/g, "\\'")}', '${voiceLang}')" title="TTS 음성 듣기">
-          <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-        </button>
-      </div>
-    `;
-  }).join('');
-}
-
-function speakText(text, lang) {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang;
-    utterance.rate = 0.85;
-    window.speechSynthesis.speak(utterance);
-  } else {
-    showToast("죄송합니다. 이 브라우저는 음성 합성(TTS) 기능을 지원하지 않습니다.", "danger");
-  }
 }
 
 // -------------------------
